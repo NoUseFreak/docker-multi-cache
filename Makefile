@@ -41,4 +41,4 @@ install:
 	sudo mv build/${APP} /usr/local/bin/${APP}
 
 test:
-	echo "No tests"
+	go run main.go docker build -t repo/name:version tests
