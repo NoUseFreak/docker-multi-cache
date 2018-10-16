@@ -1,0 +1,15 @@
+sudo: required
+language: go
+go:
+- master
+deploy:
+  provider: releases
+  api_key:
+    secure: bgGR2A595f8rsJSvLNz1DuZnx0CiNYB+rrtIq6szStWGLgeah2GpXq7QrRuHRb3+y1mfaweEjx5JDFERyXuQE6VgNqccDgjfHt6yqA5jxcJkgNe7oNPhJdWfNgdFMFmrQtXi8bJaOe92AAyJffmEu6n93SJdS82fGPJ42hpcVEUBfLrVvG892o33Fx6/Cx9J6N9/UO4LMDar6dyTaLDqgqDjg2N4LUf1J0Q+Le1J83qybcbUUn46V8lfGNwgTcf9riWRvnKMFs+emSneCb+y/8l/wc6Y56qKKuhb8yhtF6joJGxm6QXGsONku9XlwhHRSTl6MYB8meN7iMqT8PJkhISLHtlKMSa/+TwTSuSOqVyeOWe1Uvn+VUA5+t7Eq1u/D4ofhhvfWvYvpWMmeqWxxhwXxM+mcKnaDEUrUlCEke5jvJytg6QPY9WBL5oM17tk2CnCAaMAYtLk+y21aE9MM7WnhhfOELRxj1mZpLh4m/BopkO/mZ2uDQVO982UqKH7tgljQQ9lYT3J/jlHZfHih1DiQ6AbV0u8NKyDGXWeEnN8khuWBQVTZZ3FdTiH/LG8MYCfB02l7t3deLoIAJ5zzo7AjbjCz5HZ7x0Fwrq11zHRZ287tYrEhP2DN28XIxKVgVPEsVFoqI12cdy0vnq1lmXnyTUr8fYe41aD0ER/8Rc=
+  file_glob: true
+  file: build/archive/*
+  skip_cleanup: true
+  on:
+    repo: NoUseFreak/docker-multi-cache
+    tags: true
+    branch: master
