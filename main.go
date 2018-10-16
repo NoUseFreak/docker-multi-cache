@@ -112,6 +112,7 @@ func dockerBuild(info Info) {
 }
 
 func dockerPush(info Info) {
+	execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"])
 	for _, stage := range info.stages {
 		execCmd(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
 	}
