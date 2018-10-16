@@ -18,9 +18,7 @@ type Info struct {
 }
 
 func main() {
-
 	info := findInfo(os.Args[1:])
-	fmt.Printf("%v\n", info)
 
 	switch info.props["action"] {
 	case "build":
@@ -29,7 +27,6 @@ func main() {
 	case "push":
 		dockerPush(info)
 	}
-	fmt.Printf("%v\n", info)
 }
 
 func findInfo(args []string) Info {
@@ -112,7 +109,7 @@ func dockerBuild(info Info) {
 }
 
 func dockerPush(info Info) {
-	execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"])
+	execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"]))
 	for _, stage := range info.stages {
 		execCmd(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
 	}
