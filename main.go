@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 	"os/exec"
-
 )
 
 type Info struct {
@@ -18,14 +17,22 @@ type Info struct {
 }
 
 func main() {
-	info := findInfo(os.Args[1:])
+	// Prepend docker if the command got replaced
+	args := os.Args[1:]
+	if args[0] != "docker" {
+		args = append([]string{"docker"}, args...)
+	}
 
-	switch info.props["action"] {
+	switch args[1] {
 	case "build":
+		info := findInfo(args)
 		dockerPull(info)
 		dockerBuild(info)
 	case "push":
+		info := findInfo(args)
 		dockerPush(info)
+	default:
+		execCmd(strings.Join(args, " "))
 	}
 }
 
