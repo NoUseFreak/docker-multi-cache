@@ -2,7 +2,7 @@
 APP = docker-multi-cache
 
 
-default: clean build all package
+default: clean test build all package
 
 .PHONY: build
 build:
