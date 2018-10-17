@@ -1,18 +1,18 @@
 package main
 
 import (
-	"os"
+	"bufio"
 	"fmt"
 	"log"
-	"bufio"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
-	"os/exec"
 )
 
 type Info struct {
-	props map[string]string
-	stages []string
+	props        map[string]string
+	stages       []string
 	externalRepo bool
 }
 
@@ -64,7 +64,7 @@ func findInfo(args []string) Info {
 	if info.props["action"] == "build" {
 		cmd := strings.Join(append(
 			args[0:len(args)-1], // base command
-			"%s", // template
+			"%s",              // template
 			args[len(args)-1], // build directory
 		), " ")
 		info.props["buildTemplate"] = rtag.ReplaceAllString(cmd, "")
@@ -134,14 +134,14 @@ func execCmd(cmdString string) {
 
 func findDockerfile(path string) string {
 	fi, err := os.Stat(path)
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	if fi.Mode().IsRegular() {
 		return path
 	}
 	if fi.Mode().IsDir() {
-		return findDockerfile(path+"/Dockerfile")
+		return findDockerfile(path + "/Dockerfile")
 	}
 
 	log.Fatal("Could not find Dockerfile")
@@ -161,7 +161,7 @@ func getStages(dockerfile string) []string {
 	stages := []string{}
 	for scanner.Scan() {
 		matches := r.FindStringSubmatch(scanner.Text())
-		if (len(matches) == 2) {
+		if len(matches) == 2 {
 			stages = append(stages, matches[1])
 		}
 	}
