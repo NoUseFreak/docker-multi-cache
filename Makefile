@@ -38,7 +38,7 @@ clean:
 
 install:
 	chmod +x build/${APP}
-	sudo mv build/${APP} /usr/local/bin/${APP}
+	mv build/${APP} /usr/local/bin/${APP}
 
 test:
 	go run main.go docker build -t repo/name:version tests
