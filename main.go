@@ -85,11 +85,9 @@ func findInfo(args []string) Info {
 }
 
 func dockerPull(info Info) {
-	if info.externalRepo {
-		for _, stage := range info.stages {
-			image := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
-			execCmd(fmt.Sprintf("docker pull %s", image))
-		}
+	for _, stage := range info.stages {
+		image := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
+		execCmd(fmt.Sprintf("docker pull %s", image))
 	}
 	execCmd(fmt.Sprintf("docker pull %s", info.props["targetTag"]))
 }
@@ -124,12 +122,14 @@ func dockerPush(info Info) {
 
 func execCmd(cmdString string) {
 	fmt.Printf("\n# %s\n", cmdString)
-	cmdSlice := strings.Split(cmdString, " ")
-	cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if os.Getenv("DEBUG") == "" {
+		cmdSlice := strings.Split(cmdString, " ")
+		cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+	}
 }
 
 func findDockerfile(path string) string {
