@@ -19,8 +19,13 @@ type Info struct {
 func main() {
 	// Prepend docker if the command got replaced
 	args := os.Args[1:]
-	if args[0] != "docker" {
+	if len(args) == 0 || args[0] != "docker" {
 		args = append([]string{"docker"}, args...)
+	}
+
+	if len(args) == 1 {
+		execCmd(strings.Join(args, " "))
+		return
 	}
 
 	switch args[1] {
