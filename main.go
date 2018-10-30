@@ -24,7 +24,7 @@ func main() {
 	}
 
 	if len(args) == 1 {
-		execCmd(strings.Join(args, " "))
+		os.Exit(execCmd(strings.Join(args, " ")))
 		return
 	}
 
@@ -37,7 +37,7 @@ func main() {
 		info := findInfo(args)
 		os.Exit(dockerPush(info))
 	default:
-		execCmd(strings.Join(args, " "))
+		os.Exit(execCmd(strings.Join(args, " ")))
 	}
 }
 
