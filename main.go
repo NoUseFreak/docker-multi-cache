@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"syscall"
 )
 
 type Info struct {
@@ -32,10 +33,10 @@ func main() {
 	case "build":
 		info := findInfo(args)
 		dockerPull(info)
-		dockerBuild(info)
+		os.Exit(dockerBuild(info))
 	case "push":
 		info := findInfo(args)
-		dockerPush(info)
+		os.Exit(dockerPush(info))
 	default:
 		execCmd(strings.Join(args, " "))
 	}
@@ -89,15 +90,15 @@ func findInfo(args []string) Info {
 	return info
 }
 
-func dockerPull(info Info) {
+func dockerPull(info Info) int {
 	for _, stage := range info.stages {
 		image := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
 		execCmd(fmt.Sprintf("docker pull %s", image))
 	}
-	execCmd(fmt.Sprintf("docker pull %s", info.props["targetTag"]))
+	return execCmd(fmt.Sprintf("docker pull %s", info.props["targetTag"]))
 }
 
-func dockerBuild(info Info) {
+func dockerBuild(info Info) int {
 	cacheFrom := ""
 	for _, stage := range info.stages {
 		cacheTag := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
@@ -115,17 +116,18 @@ func dockerBuild(info Info) {
 	extraMainArgs := fmt.Sprintf("-t %s", info.props["targetTag"])
 	cacheFrom += fmt.Sprintf(" --cache-from %s", info.props["targetTag"])
 	extraMainArgs += cacheFrom
-	execCmd(fmt.Sprintf(info.props["buildTemplate"], extraMainArgs))
+	return execCmd(fmt.Sprintf(info.props["buildTemplate"], extraMainArgs))
 }
 
-func dockerPush(info Info) {
-	execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"]))
+func dockerPush(info Info) int {
+	exitCode := execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"]))
 	for _, stage := range info.stages {
 		execCmd(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
 	}
+	return exitCode
 }
 
-func execCmd(cmdString string) {
+func execCmd(cmdString string) int {
 	fmt.Printf("\n# %s\n", cmdString)
 	if os.Getenv("DEBUG") == "" {
 		cmdSlice := strings.Split(cmdString, " ")
@@ -133,8 +135,18 @@ func execCmd(cmdString string) {
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
-		cmd.Run()
+
+		err := cmd.Run()
+		if err != nil {
+			if exitError, ok := err.(*exec.ExitError); ok {
+				ws := exitError.Sys().(syscall.WaitStatus)
+				return ws.ExitStatus()
+			}
+			return 1
+		}
 	}
+
+	return 0
 }
 
 func findDockerfile(path string) string {
