@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -152,7 +151,8 @@ func execCmd(cmdString string) int {
 func findDockerfile(path string) string {
 	fi, err := os.Stat(path)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Could not find Dockerfile")
+		return ""
 	}
 	if fi.Mode().IsRegular() {
 		return path
@@ -161,14 +161,14 @@ func findDockerfile(path string) string {
 		return findDockerfile(path + "/Dockerfile")
 	}
 
-	log.Fatal("Could not find Dockerfile")
+	fmt.Println("Could not find Dockerfile")
 	return ""
 }
 
 func getStages(dockerfile string) []string {
 	file, err := os.Open(dockerfile)
 	if err != nil {
-		log.Fatal(err)
+		return []string{}
 	}
 	defer file.Close()
 
@@ -184,7 +184,8 @@ func getStages(dockerfile string) []string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return []string{}
 	}
 
 	return stages
