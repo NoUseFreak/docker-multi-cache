@@ -1,2 +1,3 @@
 build
-sops64
+docker-multi-cache
+*.out

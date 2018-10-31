@@ -8,7 +8,7 @@ default: clean test build all package
 build:
 	mkdir -p build
 	go get -d
-	go test
+	go test -coverprofile=cover.out
 	go build -o build/${APP} *.go
 
 all:
@@ -41,4 +41,5 @@ install:
 	mv build/${APP} /usr/local/bin/${APP}
 
 test:
+	go test -coverprofile=cover.out
 	go run main.go docker build -t repo/name:version tests
