@@ -1,10 +1,11 @@
 FROM alpine AS base
 
-RUN apk add --no-cache nginx
+RUN sleep 1
 
 FROM alpine AS base2
 
+RUN sleep 2
+
 FROM alpine
 
-
-
+RUN sleep 3

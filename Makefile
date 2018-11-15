@@ -42,4 +42,10 @@ install:
 
 test:
 	go test -coverprofile=cover.out
+
+	# Build clean
+	docker rmi -f $$(docker images repo/name -qa) || true
+	go run main.go docker build -t repo/name:version tests
+
+	# Use all local cache
 	go run main.go docker build -t repo/name:version tests
