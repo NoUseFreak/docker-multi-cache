@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -90,10 +91,17 @@ func findInfo(args []string) Info {
 }
 
 func dockerPull(info Info) int {
+	var wg sync.WaitGroup
+	wg.Add(len(info.stages))
 	for _, stage := range info.stages {
 		image := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
-		execCmd(fmt.Sprintf("docker pull %s", image))
+		go func(pullCmd string) {
+			defer wg.Done()
+			execCmd(pullCmd)
+		}(fmt.Sprintf("docker pull %s", image))
 	}
+	wg.Wait()
+
 	return execCmd(fmt.Sprintf("docker pull %s", info.props["targetTag"]))
 }
 
@@ -120,9 +128,17 @@ func dockerBuild(info Info) int {
 
 func dockerPush(info Info) int {
 	exitCode := execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"]))
+
+	var wg sync.WaitGroup
+	wg.Add(len(info.stages))
 	for _, stage := range info.stages {
-		execCmd(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
+		go func(pushCmd string) {
+			defer wg.Done()
+			execCmd(pushCmd)
+		}(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
 	}
+	wg.Wait()
+
 	return exitCode
 }
 
