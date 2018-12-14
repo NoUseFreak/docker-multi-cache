@@ -106,23 +106,17 @@ func dockerPull(info Info) int {
 }
 
 func dockerBuild(info Info) int {
-	cacheFrom := ""
 	for _, stage := range info.stages {
 		cacheTag := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
-		cacheFrom += fmt.Sprintf(" --cache-from %s", cacheTag)
 
 		// Set new cache tag
 		extraArgs := fmt.Sprintf("-t %s", cacheTag)
-		// Set previous cache from
-		extraArgs += cacheFrom
 		// Target to build
 		extraArgs += fmt.Sprintf(" --target %s", stage)
 		execCmd(fmt.Sprintf(info.props["buildTemplate"], extraArgs))
 	}
 
 	extraMainArgs := fmt.Sprintf("-t %s", info.props["targetTag"])
-	cacheFrom += fmt.Sprintf(" --cache-from %s", info.props["targetTag"])
-	extraMainArgs += cacheFrom
 	return execCmd(fmt.Sprintf(info.props["buildTemplate"], extraMainArgs))
 }
 
