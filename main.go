@@ -92,14 +92,17 @@ func findInfo(args []string) Info {
 
 func dockerPull(info Info) int {
 	var wg sync.WaitGroup
-	wg.Add(len(info.stages))
+	wg.Add(len(info.stages) + 1)
 	for _, stage := range info.stages {
-		image := fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)
 		go func(pullCmd string) {
 			defer wg.Done()
 			execCmd(pullCmd)
-		}(fmt.Sprintf("docker pull %s", image))
+		}(fmt.Sprintf("docker pull %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
 	}
+	go func(pullCmd string) {
+		defer wg.Done()
+		execCmd(pullCmd)
+	}(fmt.Sprintf("docker pull %s", fmt.Sprintf(info.props["tagTemplate"], "cache")))
 	wg.Wait()
 
 	return execCmd(fmt.Sprintf("docker pull %s", info.props["targetTag"]))
@@ -116,7 +119,7 @@ func dockerBuild(info Info) int {
 		execCmd(fmt.Sprintf(info.props["buildTemplate"], extraArgs))
 	}
 
-	extraMainArgs := fmt.Sprintf("-t %s", info.props["targetTag"])
+	extraMainArgs := fmt.Sprintf("-t %s -t %s", info.props["targetTag"], fmt.Sprintf(info.props["tagTemplate"], "cache"))
 	return execCmd(fmt.Sprintf(info.props["buildTemplate"], extraMainArgs))
 }
 
@@ -124,13 +127,17 @@ func dockerPush(info Info) int {
 	exitCode := execCmd(fmt.Sprintf("docker push %s", info.props["targetTag"]))
 
 	var wg sync.WaitGroup
-	wg.Add(len(info.stages))
+	wg.Add(len(info.stages) + 1)
 	for _, stage := range info.stages {
 		go func(pushCmd string) {
 			defer wg.Done()
 			execCmd(pushCmd)
 		}(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], info.props["cachePrefix"]+stage)))
 	}
+	go func(pushCmd string) {
+		defer wg.Done()
+		execCmd(pushCmd)
+	}(fmt.Sprintf("docker push %s", fmt.Sprintf(info.props["tagTemplate"], "cache")))
 	wg.Wait()
 
 	return exitCode
